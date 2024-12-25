@@ -15,7 +15,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
-      - todo_network
+      - backend_network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
       interval: 5s
@@ -36,7 +36,9 @@ services:
     depends_on:
       - postgres
     networks:
-      - todo_network
+      - frontend_network
+      - backend_network
+    user: appuser
 
   react:
     container_name: todo_react
@@ -51,7 +53,7 @@ services:
     depends_on:
       - django
     networks:
-      - todo_network
+      - frontend_network
 
   uptime-kuma:
     image: louislam/uptime-kuma
@@ -60,11 +62,15 @@ services:
       - 3001:3001
     volumes:
       - uptime-kuma-data:/app/data
+    networks:
+      - frontend_network
 
 volumes:
   postgres_data:
   uptime-kuma-data:
 
 networks:
-  todo_network:
+  frontend_network:
+    driver: bridge
+  backend_network:
     driver: bridge
